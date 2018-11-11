@@ -8,20 +8,22 @@ public class Main {
 
     public static final String AUTHOR_PREFIX = "Author: ";
     public static final String DATE_PREFIX = "Date:   ";
+    public static final String TARGET_FILE_PREFIX = "+++";
 
     public static void main(String[] args) throws IOException {
-        if (args == null || args.length != 2) {
-            System.out.println("Usage java aaa.Main <path-to-git-repo> <path-to-csv-output-file>");
+        if (args == null || args.length < 2) {
+            System.out.println("Usage java aaa.Main <path-to-git-repo> <path-to-csv-output-file> <exclusionPattern>");
         }
         String gitFolder = args[0];
         String outputFolder = args[1];
+        String exclusionPattern = args.length >=2 ? args[2] : null;
         Process process = Runtime.getRuntime().exec("git --git-dir " + gitFolder + "\\.git log -p --reverse");
         BufferedReader gitOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-        convertToCsv(gitOutput, outputFolder);
+        convertToCsv(gitOutput, outputFolder, exclusionPattern);
     }
 
-    private static void convertToCsv(BufferedReader gitOutput, String targetFileFolder) throws IOException {
+    private static void convertToCsv(BufferedReader gitOutput, String targetFileFolder, String exclusionPattern) throws IOException {
         String s;
         Commit commit = null;
         BufferedWriter commitsWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Commits.csv"));
@@ -29,6 +31,7 @@ public class Main {
         BufferedWriter daysWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Days.csv"));
         String week = null;
         String day = null;
+        File file = null;
         while ((s = gitOutput.readLine()) != null) {
             if (s.startsWith("commit ")) {
 
@@ -49,16 +52,23 @@ public class Main {
                     day = getDateString(commit);
                 }
             }
-            if (isAddedLineOfCode(s)) {
+            if (isAddedLineOfCode(s) && !file.shouldBeExcludedFromStatistics()) {
                 commit.incrementLinesAdded();
             }
-            if (isRemovedLineOfCode(s)) {
+            if (isRemovedLineOfCode(s) && !file.shouldBeExcludedFromStatistics()) {
                 commit.incrementLinesRemoved();
+            }
+            if (s.startsWith(TARGET_FILE_PREFIX)) {
+                file = getFile(s, exclusionPattern);
             }
         }
         commitsWriter.close();
         weekWriter.close();
         daysWriter.close();
+    }
+
+    private static File getFile(String fileLine, String exclusionPattern) {
+        return new File(fileLine.substring(fileLine.indexOf("+++ /b") + 5), exclusionPattern);
     }
 
     private static String getDateString(Commit commit) {
@@ -82,7 +92,7 @@ public class Main {
     }
 
     private static boolean isAddedLineOfCode(String gitLine) {
-        return gitLine.startsWith("+") && !gitLine.startsWith("+++");
+        return gitLine.startsWith("+") && !gitLine.startsWith(TARGET_FILE_PREFIX);
     }
 
     private static OffsetDateTime getDateTime(String dateTimeLine) {
