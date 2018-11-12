@@ -3,6 +3,10 @@ package aaa;
 import java.util.regex.Pattern;
 
 public class File {
+    public String getName() {
+        return name;
+    }
+
     private String name;
     private boolean excludeFromStatistics;
 

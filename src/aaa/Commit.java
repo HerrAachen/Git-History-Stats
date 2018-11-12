@@ -1,6 +1,9 @@
 package aaa;
 
 import java.time.OffsetDateTime;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Commit {
     private String author;
@@ -8,6 +11,7 @@ public class Commit {
     private int linesAdded = 0;
     private int linesRemoved = 0;
     private int totalLinesOfCode;
+    private List<File> filesChanged = new LinkedList<>();
 
     public Commit(int totalLinesOfCode) {
         this.totalLinesOfCode = totalLinesOfCode;
@@ -50,5 +54,13 @@ public class Commit {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public void addFile(File file) {
+        filesChanged.add(file);
+    }
+
+    public String getChangedFiles() {
+        return filesChanged.stream().map(file -> file.getName()).collect(Collectors.joining(";"));
     }
 }

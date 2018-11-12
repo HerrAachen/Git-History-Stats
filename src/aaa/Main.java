@@ -27,7 +27,7 @@ public class Main {
         String s;
         Commit commit = null;
         BufferedWriter commitsWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Commits.csv"));
-        commitsWriter.write("User,Date,Total LOC,LOC Added,LOC Removed\r\n");
+        commitsWriter.write("User,Date,Total LOC,LOC Added,LOC Removed,Files\r\n");
         BufferedWriter weekWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Weeks.csv"));
         weekWriter.write("Date,Total LOC\r\n");
         BufferedWriter daysWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Days.csv"));
@@ -63,6 +63,9 @@ public class Main {
             }
             if (s.startsWith(TARGET_FILE_PREFIX)) {
                 file = getFile(s, exclusionPattern);
+                if (!file.shouldBeExcludedFromStatistics()) {
+                    commit.addFile(file);
+                }
             }
         }
         commitsWriter.close();
@@ -71,7 +74,7 @@ public class Main {
     }
 
     private static File getFile(String fileLine, String exclusionPattern) {
-        return new File(fileLine.substring(fileLine.indexOf("+++ /b") + 5), exclusionPattern);
+        return new File(fileLine.substring(fileLine.indexOf("+++ /b") + 7), exclusionPattern);
     }
 
     private static String getDateString(Commit commit) {
@@ -114,6 +117,7 @@ public class Main {
                     + commit.getTotalLinesOfCode() + ","
                     + commit.getLinesAdded() + ","
                     + commit.getLinesRemoved() + ","
+                    + commit.getChangedFiles()
                     + "\r\n");
         }
     }
