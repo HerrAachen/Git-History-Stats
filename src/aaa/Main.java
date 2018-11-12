@@ -27,8 +27,11 @@ public class Main {
         String s;
         Commit commit = null;
         BufferedWriter commitsWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Commits.csv"));
+        commitsWriter.write("User,Date,Total LOC,LOC Added,LOC Removed\r\n");
         BufferedWriter weekWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Weeks.csv"));
+        weekWriter.write("Date,Total LOC\r\n");
         BufferedWriter daysWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Days.csv"));
+        daysWriter.write("Date,Total LOC\r\n");
         String week = null;
         String day = null;
         File file = null;
@@ -109,6 +112,8 @@ public class Main {
             fileWriter.write(commit.getAuthor() + ","
                     + commit.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + ","
                     + commit.getTotalLinesOfCode() + ","
+                    + commit.getLinesAdded() + ","
+                    + commit.getLinesRemoved() + ","
                     + "\r\n");
         }
     }
