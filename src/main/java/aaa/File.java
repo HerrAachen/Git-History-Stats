@@ -3,26 +3,26 @@ package aaa;
 import java.util.regex.Pattern;
 
 public class File {
-    public String getName() {
-        return name;
+
+    private String sourceFileName;
+    private String targetFileName;
+
+    public void setTargetFileName(String targetFileName) {
+        this.targetFileName = targetFileName;
     }
 
-    private String name;
-    private boolean excludeFromStatistics;
-
-    public File(String name, String exclusionPattern) {
-        this.name = name;
-        excludeFromStatistics = shouldBeExcluded(exclusionPattern);
+    public File(String sourceFileName) {
+        this.sourceFileName = sourceFileName;
+    }
+    public String getTargetFileName() {
+        return targetFileName;
     }
 
-    public boolean shouldBeExcludedFromStatistics() {
-        return excludeFromStatistics;
-    }
-
-    private boolean shouldBeExcluded(String exclusionPattern) {
-        boolean shouldBeExcluded = exclusionPattern != null && Pattern.matches(exclusionPattern, name);
+    public boolean shouldBeExcluded(String exclusionPattern) {
+        boolean shouldBeExcluded = exclusionPattern != null &&
+                (Pattern.matches(exclusionPattern, targetFileName) || Pattern.matches(exclusionPattern, sourceFileName));
         if (shouldBeExcluded) {
-            System.out.println("Excluding " + name);
+            System.out.println("Excluding " + targetFileName);
         }
         return shouldBeExcluded;
     }

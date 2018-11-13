@@ -61,6 +61,6 @@ public class Commit {
     }
 
     public String getChangedFiles() {
-        return filesChanged.stream().map(file -> file.getName()).collect(Collectors.joining(";"));
+        return filesChanged.stream().map(file -> file.getTargetFileName()).collect(Collectors.joining(";"));
     }
 }

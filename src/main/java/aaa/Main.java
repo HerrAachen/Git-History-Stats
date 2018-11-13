@@ -8,7 +8,8 @@ public class Main {
 
     public static final String AUTHOR_PREFIX = "Author: ";
     public static final String DATE_PREFIX = "Date:   ";
-    public static final String TARGET_FILE_PREFIX = "+++";
+    public static final String SOURCE_FILE_PREFIX = "--- ";
+    public static final String TARGET_FILE_PREFIX = "+++ ";
 
     public static void main(String[] args) throws IOException {
         if (args == null || args.length < 2) {
@@ -24,7 +25,7 @@ public class Main {
     }
 
     private static void convertToCsv(BufferedReader gitOutput, String targetFileFolder, String exclusionPattern) throws IOException {
-        String s;
+        String currentLine;
         Commit commit = null;
         BufferedWriter commitsWriter = new BufferedWriter(new FileWriter(targetFileFolder + "\\Commits.csv"));
         commitsWriter.write("User,Date,Total LOC,LOC Added,LOC Removed,Files\r\n");
@@ -35,17 +36,18 @@ public class Main {
         String week = null;
         String day = null;
         File file = null;
-        while ((s = gitOutput.readLine()) != null) {
-            if (s.startsWith("commit ")) {
+        String previousLine = null;
+        while ((currentLine = gitOutput.readLine()) != null) {
+            if (currentLine.startsWith("commit ")) {
 
                 writeCommitLine(commitsWriter, commit);
                 commit = new Commit(commit != null ? commit.getTotalLinesOfCode() : 0);
             }
-            if (s.startsWith(AUTHOR_PREFIX)) {
-                commit.setAuthor(getAuthor(s));
+            if (currentLine.startsWith(AUTHOR_PREFIX)) {
+                commit.setAuthor(getAuthor(currentLine));
             }
-            if (s.startsWith(DATE_PREFIX)) {
-                commit.setDateTime(getDateTime(s));
+            if (currentLine.startsWith(DATE_PREFIX)) {
+                commit.setDateTime(getDateTime(currentLine));
                 if (isDifferentWeek(week, commit)) {
                     writeDateAndTotalLoc(weekWriter, commit);
                     week = getWeekString(commit);
@@ -55,26 +57,47 @@ public class Main {
                     day = getDateString(commit);
                 }
             }
-            if (isAddedLineOfCode(s) && !file.shouldBeExcludedFromStatistics()) {
+            if (isAddedLineOfCode(currentLine) && !file.shouldBeExcluded(exclusionPattern)) {
                 commit.incrementLinesAdded();
             }
-            if (isRemovedLineOfCode(s) && !file.shouldBeExcludedFromStatistics()) {
+            if (isRemovedLineOfCode(currentLine) && !file.shouldBeExcluded(exclusionPattern)) {
                 commit.incrementLinesRemoved();
             }
-            if (s.startsWith(TARGET_FILE_PREFIX)) {
-                file = getFile(s, exclusionPattern);
-                if (!file.shouldBeExcludedFromStatistics()) {
+            if (isSourceFileLine(currentLine, previousLine)) {
+                file = getFile(currentLine);
+            }
+            if (isTargetFileLine(currentLine, previousLine)) {
+                file.setTargetFileName(getFileString(currentLine));
+                if (!file.shouldBeExcluded(exclusionPattern)) {
                     commit.addFile(file);
                 }
             }
+            previousLine = currentLine;
         }
         commitsWriter.close();
         weekWriter.close();
         daysWriter.close();
     }
 
-    private static File getFile(String fileLine, String exclusionPattern) {
-        return new File(fileLine.substring(fileLine.indexOf("+++ /b") + 7), exclusionPattern);
+    private static boolean isTargetFileLine(String currentLine, String previousLine) {
+        return currentLine.startsWith(TARGET_FILE_PREFIX)  && previousLine.startsWith(SOURCE_FILE_PREFIX);
+    }
+
+    private static boolean isSourceFileLine(String currentLine, String previousLine) {
+        return currentLine.startsWith(SOURCE_FILE_PREFIX) && previousLine.startsWith("index ");
+    }
+
+    private static String getFileString(String s) {
+        return s.substring(s.indexOf("/"));
+    }
+
+    private static File getFile(String fileLine) {
+        try {
+            return new File(getFileString(fileLine));
+        } catch (Exception e) {
+            System.out.println("Could not extract file name from " + fileLine);
+            throw e;
+        }
     }
 
     private static String getDateString(Commit commit) {
