@@ -61,6 +61,12 @@ public class Commit {
     }
 
     public String getChangedFiles() {
-        return filesChanged.stream().map(file -> file.getTargetFileName()).collect(Collectors.joining(";"));
+        return filesChanged.stream().map(file -> {
+            if (!file.getTargetFileName().contains("dev/null")) {
+                return file.getTargetFileName();
+            } else {
+                return file.getSourceFileName();
+            }
+        }).collect(Collectors.joining(";"));
     }
 }

@@ -4,6 +4,10 @@ import java.util.regex.Pattern;
 
 public class File {
 
+    public String getSourceFileName() {
+        return sourceFileName;
+    }
+
     private String sourceFileName;
     private String targetFileName;
 
