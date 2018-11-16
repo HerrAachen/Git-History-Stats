@@ -23,11 +23,7 @@ public class File {
     }
 
     public boolean shouldBeExcluded(String exclusionPattern) {
-        boolean shouldBeExcluded = exclusionPattern != null &&
+        return exclusionPattern != null &&
                 (Pattern.matches(exclusionPattern, targetFileName) || Pattern.matches(exclusionPattern, sourceFileName));
-        if (shouldBeExcluded) {
-            System.out.println("Excluding " + targetFileName);
-        }
-        return shouldBeExcluded;
     }
 }

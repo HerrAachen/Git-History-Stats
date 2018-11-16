@@ -70,6 +70,8 @@ public class Main {
                 file.setTargetFileName(getFileString(currentLine));
                 if (!file.shouldBeExcluded(exclusionPattern)) {
                     commit.addFile(file);
+                } else {
+                    System.out.println("Excluding [" + file.getSourceFileName()+ "] [" + file.getTargetFileName()+ "]");
                 }
             }
             previousLine = currentLine;
