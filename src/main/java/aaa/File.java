@@ -26,4 +26,12 @@ public class File {
         return exclusionPattern != null &&
                 (Pattern.matches(exclusionPattern, targetFileName) || Pattern.matches(exclusionPattern, sourceFileName));
     }
+
+    @Override
+    public String toString() {
+        StringBuilder string = new StringBuilder();
+        string.append(!"/dev/null".equals(sourceFileName)?"[" + sourceFileName + "] ":"");
+        string.append(!"/dev/null".equals(targetFileName) && !sourceFileName.equals(targetFileName)?"[" + targetFileName+ "]":"");
+        return string.toString();
+    }
 }

@@ -71,7 +71,7 @@ public class Main {
                 if (!file.shouldBeExcluded(exclusionPattern)) {
                     commit.addFile(file);
                 } else {
-                    System.out.println("Excluding [" + file.getSourceFileName()+ "] [" + file.getTargetFileName()+ "]");
+                    System.out.println("Excluding " + file);
                 }
             }
             previousLine = currentLine;
