@@ -8,36 +8,14 @@ import java.util.stream.Collectors;
 public class Commit {
     private String author;
     private OffsetDateTime dateTime;
-    private int linesAdded = 0;
-    private int linesRemoved = 0;
-    private int totalLinesOfCode;
     private List<File> filesChanged = new LinkedList<>();
 
-    public Commit(int totalLinesOfCode) {
-        this.totalLinesOfCode = totalLinesOfCode;
-    }
-
-    public int getTotalLinesOfCode() {
-        return totalLinesOfCode;
-    }
-
-
-    public void incrementLinesAdded() {
-        linesAdded++;
-        totalLinesOfCode++;
-    }
-
-    public void incrementLinesRemoved() {
-        linesRemoved++;
-        totalLinesOfCode--;
-    }
-
     public int getLinesAdded() {
-        return linesAdded;
+        return filesChanged.stream().mapToInt(file -> file.getLinesAdded()).sum();
     }
 
     public int getLinesRemoved() {
-        return linesRemoved;
+        return filesChanged.stream().mapToInt(file -> file.getLinesRemoved()).sum();
     }
 
     public OffsetDateTime getDateTime() {
