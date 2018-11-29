@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 public class Commit {
     private String author;
     private OffsetDateTime dateTime;
+    private String commitMessage = "";
     private List<File> filesChanged = new LinkedList<>();
 
     public int getLinesAdded() {
@@ -16,6 +17,14 @@ public class Commit {
 
     public int getLinesRemoved() {
         return filesChanged.stream().mapToInt(file -> file.getLinesRemoved()).sum();
+    }
+
+    public String getCommitMessage() {
+        return commitMessage;
+    }
+
+    public void appendToMessage(String messageLine) {
+        commitMessage += messageLine.trim() + " ";
     }
 
     public OffsetDateTime getDateTime() {

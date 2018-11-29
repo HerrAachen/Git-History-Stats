@@ -30,7 +30,7 @@ public class Main {
         String currentLine;
         Commit commit = null;
         BufferedWriter commitsWriter = new BufferedWriter(new FileWriter(outputFolder + "\\Commits.csv"));
-        commitsWriter.write("User,Date,Total LOC,LOC Added,LOC Removed,Files\r\n");
+        commitsWriter.write("User,Date,Total LOC,LOC Added,LOC Removed,Commit Message,Files\r\n");
         BufferedWriter weekWriter = new BufferedWriter(new FileWriter(outputFolder + "\\Weeks.csv"));
         weekWriter.write("Date,Total LOC\r\n");
         BufferedWriter daysWriter = new BufferedWriter(new FileWriter(outputFolder + "\\Days.csv"));
@@ -40,6 +40,7 @@ public class Main {
         File file = null;
         String previousLine = null;
         int totalLoc = 0;
+        boolean isCommitMessageRow = false;
         Map<String, Integer> type2Loc = new HashMap<>();
         while ((currentLine = gitOutput.readLine()) != null) {
             if (currentLine.startsWith("commit ")) {
@@ -48,6 +49,13 @@ public class Main {
                 }
                 writeCommitLine(commitsWriter, commit, totalLoc);
                 commit = new Commit();
+            }
+            if (isCommitMessageRow) {
+                if (currentLine.isEmpty() || currentLine.startsWith("   ")) {
+                    commit.appendToMessage(currentLine);
+                } else {
+                    isCommitMessageRow = false;
+                }
             }
             if (currentLine.startsWith(AUTHOR_PREFIX)) {
                 commit.setAuthor(getAuthor(currentLine));
@@ -62,6 +70,7 @@ public class Main {
                     writeDateAndTotalLoc(daysWriter, commit, totalLoc);
                     day = getDateString(commit);
                 }
+                isCommitMessageRow = true;
             }
             if (isAddedLineOfCode(currentLine) && !file.shouldBeExcluded(exclusionPattern)) {
                 file.incrementLinesAdded();
@@ -174,6 +183,7 @@ public class Main {
                     + totalLoc + ","
                     + commit.getLinesAdded() + ","
                     + commit.getLinesRemoved() + ","
+                    + commit.getCommitMessage() + ","
                     + commit.getChangedFiles()
                     + "\r\n");
         }
