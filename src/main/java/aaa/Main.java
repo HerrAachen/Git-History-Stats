@@ -93,7 +93,10 @@ public class Main {
         BufferedWriter writer = new BufferedWriter(new FileWriter(outputFolder + "\\FileTypes.csv"));
         writer.write("File Type,Lines of Code\r\n");
         for(Map.Entry<String, Integer> typeAndLoc: type2Loc.entrySet()) {
-            writer.write(typeAndLoc.getKey() + "," + typeAndLoc.getValue() + "\r\n");
+            Integer loc = typeAndLoc.getValue();
+            if (loc != 0) {
+                writer.write(typeAndLoc.getKey() + "," + loc + "\r\n");
+            }
         }
         writer.close();
     }

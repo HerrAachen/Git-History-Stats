@@ -42,8 +42,13 @@ public class File {
     }
 
     public boolean shouldBeExcluded(String exclusionPattern) {
+        String target = targetFileName.trim();
+        String source = sourceFileName.trim();
         return exclusionPattern != null &&
-                (Pattern.matches(exclusionPattern, targetFileName) || Pattern.matches(exclusionPattern, sourceFileName));
+                (Pattern.matches(exclusionPattern, target) ||
+                        Pattern.matches(exclusionPattern, target.toLowerCase()) ||
+                        Pattern.matches(exclusionPattern, source) ||
+                        Pattern.matches(exclusionPattern, source.toLowerCase()));
     }
 
     private boolean isEmpty(String fileName) {
@@ -57,7 +62,7 @@ public class File {
         } else {
             fileName = targetFileName;
         }
-        return fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+        return fileName.substring(fileName.lastIndexOf(".")).toLowerCase().trim();
     }
 
     @Override
