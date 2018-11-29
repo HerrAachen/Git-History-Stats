@@ -52,7 +52,7 @@ public class Main {
             }
             if (isCommitMessageRow) {
                 if (currentLine.isEmpty() || currentLine.startsWith("   ")) {
-                    commit.appendToMessage(currentLine);
+                    commit.appendToMessage(currentLine.replace(',', ' '));
                 } else {
                     isCommitMessageRow = false;
                 }
